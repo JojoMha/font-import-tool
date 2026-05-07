@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEST</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.17/paper-full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pathdata@6.0.3/lib/SVGPathData.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --border: 3px solid #000;
+      --font: 'JetBrains Mono', monospace;
+    }
+    
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* HEADER */
+    header {
+      border-bottom: var(--border);
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+    }
+    
+    .logo span {
+      background: var(--fg);
+      color: var(--bg);
+      padding: 2px 8px;
+      margin-left: 8px;
+    }
+    
+    .header-info {
+      font-size: 11px;
+      text-align: right;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.6;
+    }
+    
+    /* MAIN LAYOUT */
+    main {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      min-height: calc(100vh - 80px);
+    }
+    
+    /* PANELS */
+    .panel {
+      border-right: var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .panel:last-child {
+      border-right: none;
+    }
+    
+    .panel-header {
+      border-bottom: var(--border);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--fg);
+      color: var(--bg);
+    }
+    
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .panel-subtitle {
+      font-size: 10px;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+    
+    /* CANVAS AREA */
+    .canvas-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 19px,
+          #f0f0f0 19px,
+          #f0f0f0 20px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 19px,
+          #f0f0f0 19px,
+          #f0f0f0 20px
+        );
+      padding: 20px;
+      position: relative;
+    }
+    
+    .canvas-wrap canvas {
+      border: var(--border);
+      background: white;
+      cursor: crosshair;
+    }
+    
+    /* CONTROLS */
+    .controls {
+      border-top: var(--border);
+      padding: 20px;
+      background: #fafafa;
+    }
+    
+    .control-section {
+      margin-bottom: 20px;
+    }
+    
+    .control-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .control-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .control-value {
+      font-weight: 400;
+      opacity: 0.6;
+    }
+    
+    /* SLIDERS */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 24px;
+      background: var(--bg);
+      border: 2px solid var(--fg);
+      cursor: pointer;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      background: var(--fg);
+      cursor: pointer;
+      border: none;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: var(--fg);
+      cursor: pointer;
+      border: none;
+      border-radius: 0;
+    }
+    
+    /* BUTTONS */
+    .btn {
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 12px 20px;
+      border: 2px solid var(--fg);
+      background: var(--bg);
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    
+    .btn:hover {
+      background: var(--fg);
+      color: var(--bg);
+    }
+    
+    .btn-primary {
+      background: var(--fg);
+      color: var(--bg);
+    }
+    
+    .btn-primary:hover {
+      background: var(--bg);
+      color: var(--fg);
+    }
+    
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-row .btn {
+      flex: 1;
+      min-width: 100px;
+    }
+    
+    /* CHECKBOX */
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .checkbox-wrap input[type="checkbox"] {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--fg);
+      background: var(--bg);
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .checkbox-wrap input[type="checkbox"]:checked {
+      background: var(--fg);
+    }
+    
+    .checkbox-wrap input[type="checkbox"]:checked::after {
+      content: '✓';
+      color: var(--bg);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .checkbox-wrap label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+    
+    /* LETTER EDITOR SPECIFIC */
+    .letter-nav {
+      display: flex;
+      border-bottom: var(--border);
+      overflow-x: auto;
+    }
+    
+    .letter-btn {
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border: none;
+      border-right: 2px solid var(--fg);
+      background: var(--bg);
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    
+    .letter-btn:hover,
+    .letter-btn.active {
+      background: var(--fg);
+      color: var(--bg);
+    }
+    
+    .letter-btn:last-child {
+      border-right: none;
+    }
+    
+    /* INPUT */
+    .text-input {
+      font-family: var(--font);
+      font-size: 12px;
+      padding: 10px 15px;
+      border: 2px solid var(--fg);
+      background: var(--bg);
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .text-input:focus {
+      outline: none;
+      background: #f0f0f0;
+    }
+    
+    .size-inputs {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .size-inputs input {
+      width: 60px;
+      text-align: center;
+    }
+    
+    .size-inputs span {
+      font-weight: 700;
+    }
+    
+    /* STATUS BAR */
+    .status-bar {
+      font-size: 10px;
+      padding: 8px 15px;
+      background: var(--fg);
+      color: var(--bg);
+      display: flex;
+      justify-content: space-between;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* GRID INFO OVERLAY */
+    .grid-info {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+      border: 1px solid var(--fg);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--fg);
+    }
+    
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      
+      .panel {
+        border-right: none;
+        border-bottom: var(--border);
+      }
+      
+      .canvas-wrap {
+        min-height: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 137.582 137.586">
+      <path d="M68.791,0H.617c15.525,3.401,32.4,9.337,49.32,17.759,52.94,26.359,86.224,67.075,74.343,90.944-11.885,23.869-64.438,21.851-117.378-4.511-2.343-1.164-4.641-2.36-6.901-3.579v36.973h68.791c37.993,0,68.791-30.801,68.791-68.794S106.785,0,68.791,0"/>
+    </svg>
+  </div>
+  <div class="header-info">
+    Modular Type System<br>
+    v1.0
+  </div>
+</header>
+
+<main>
+  <!-- LEFT PANEL: COMPOSITION EDITOR -->
+  <div class="panel" id="composition-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Kompozycja</div>
+        <div class="panel-subtitle">Rysuj modularną kompozycję</div>
+      </div>
+    </div>
+    
+    <div class="canvas-wrap" id="comp-canvas-wrap">
+      <div class="grid-info">
+        Klik = węzeł / Shift+klik = overshoot
+      </div>
+      <video id="camera-video" autoplay playsinline style="display:none;"></video>
+      <div id="composition-canvas"></div>
+    </div>
+    
+    <div class="controls">
+      <div class="control-section">
+        <div class="control-label">Rozmiar siatki kompozycji</div>
+        <div class="size-inputs">
+          <input type="number" class="text-input" id="comp-cols" value="16" min="4" max="32">
+          <span>×</span>
+          <input type="number" class="text-input" id="comp-rows" value="12" min="4" max="24">
+          <button class="btn" id="btn-resize-comp">OK</button>
+        </div>
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Chaos siatki
+          <span class="control-value" id="val-chaos">0</span>
+        </div>
+        <input type="range" id="slider-chaos" min="0" max="100" value="0">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Masa główna (R_MAIN)
+          <span class="control-value" id="val-main">30</span>
+        </div>
+        <input type="range" id="slider-main" min="10" max="56" value="30">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Overshoot
+          <span class="control-value" id="val-over">115%</span>
+        </div>
+        <input type="range" id="slider-over" min="100" max="160" value="115">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Mostki (R_CONNECT)
+          <span class="control-value" id="val-connect">22</span>
+        </div>
+        <input type="range" id="slider-connect" min="5" max="44" value="22">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Dziurki na węzłach
+          <span class="control-value" id="val-hole-node">11</span>
+        </div>
+        <input type="range" id="slider-hole-node" min="0" max="40" value="11">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Dziury między węzłami
+          <span class="control-value" id="val-hole-pair">17</span>
+        </div>
+        <input type="range" id="slider-hole-pair" min="0" max="44" value="17">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Duże dziury 2×2
+          <span class="control-value" id="val-hole-big">30</span>
+        </div>
+        <input type="range" id="slider-hole-big" min="0" max="68" value="30">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">
+          Kropki siatki
+          <span class="control-value" id="val-dot">4</span>
+        </div>
+        <input type="range" id="slider-dot" min="0" max="24" value="4">
+      </div>
+      
+      <div class="checkbox-wrap">
+        <input type="checkbox" id="anim-check">
+        <label for="anim-check">Animacja parametrów</label>
+      </div>
+      
+      <div class="checkbox-wrap">
+        <input type="checkbox" id="camera-check">
+        <label for="camera-check">Kamera (raster)</label>
+      </div>
+      
+      <div class="btn-row" style="margin-top: 20px;">
+        <button class="btn" id="btn-random">Losowa</button>
+        <button class="btn" id="btn-clear-comp">Wyczyść</button>
+        <button class="btn btn-primary" id="btn-export-svg">Eksport SVG</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- RIGHT PANEL: LETTER EDITOR -->
+  <div class="panel" id="letter-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Edytor liter</div>
+        <div class="panel-subtitle">Twórz alfabet modularny</div>
+      </div>
+    </div>
+    
+    <div class="letter-nav" id="letter-nav">
+      <!-- Generated by JS -->
+    </div>
+    
+    <div class="canvas-wrap">
+      <div class="grid-info" id="current-letter-info">Litera: A</div>
+      <div id="letter-canvas"></div>
+    </div>
+    
+    <div class="controls">
+      <div class="control-section">
+        <div class="control-label">Rozmiar siatki litery</div>
+        <div class="size-inputs">
+          <input type="number" class="text-input" id="letter-cols" value="8" min="4" max="16">
+          <span>×</span>
+          <input type="number" class="text-input" id="letter-rows" value="10" min="4" max="16">
+          <button class="btn" id="btn-resize-letter">OK</button>
+        </div>
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">Podgląd tekstu</div>
+        <input type="text" class="text-input" id="preview-text" placeholder="WPISZ TEKST..." value="MONA">
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">Podgląd</div>
+        <div id="text-preview-area" style="min-height: 60px; border: 2px solid #000; background: #fff; padding: 10px; overflow-x: auto; white-space: nowrap;"></div>
+      </div>
+      
+      <div class="control-section">
+        <div class="control-label">Nazwa fontu</div>
+        <input type="text" class="text-input" id="font-name" placeholder="MojFont" value="MojFont">
+      </div>
+      
+      <div class="btn-row" style="margin-top: 15px;">
+        <button class="btn" id="btn-clear-letter">Wyczyść literę</button>
+        <button class="btn" id="btn-copy-from-comp">← Kopiuj z kompozycji</button>
+      </div>
+      
+      <div class="btn-row" style="margin-top: 10px;">
+        <button class="btn btn-primary" id="btn-export-ttf">Eksport TTF</button>
+      </div>
+      
+      <div class="control-section" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #000;">
+        <div class="control-label">Import TTF to modular</div>
+        <input type="file" id="ttf-import" accept=".ttf,.otf" style="display:none;">
+        <div class="btn-row">
+          <button class="btn" id="btn-import-ttf">Import TTF</button>
+          <button class="btn" id="btn-import-all">Import all letters</button>
+        </div>
+        <div class="size-inputs" style="margin-top: 10px;">
+          <span style="font-size: 10px;">Threshold:</span>
+          <input type="range" id="import-threshold" min="0.1" max="0.9" step="0.05" value="0.3" style="flex:1;">
+          <span class="control-value" id="val-threshold">0.3</span>
+        </div>
+      </div>
+      
+      <div class="control-section" style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #000;">
+        <div class="control-label">Presets</div>
+        <div class="btn-row">
+          <button class="btn" id="btn-preset-wide">WIDE (9×5)</button>
+          <button class="btn" id="btn-preset-default">Default (5×5)</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="status-bar">
+      <span id="letters-done">Ukończone: 0/36</span>
+      <span id="letter-grid-info">Grid: 8×10</span>
+    </div>
+  </div>
+</main>
+
+<script>
+// ============================================================
+// MONA STUDIO - Dual Canvas Modular Type Editor
+// ============================================================
+
+// --- SHARED CONFIG ---
+const SPACING = 40;
+const MARGIN = 60;
+
+// --- COMPOSITION CANVAS (LEFT) ---
+let compCols = 16;
+let compRows = 12;
+let compGrid = [];
+let compBigNode = [];
+let compGridOffsets = []; // dla chaosu siatki
+let compP5;
+
+// --- LETTER CANVAS (RIGHT) ---
+let letterCols = 5;
+let letterRows = 5;
+let letterGrids = {}; // stores grid for each character
+let letterBigNodes = {}; // stores bigNode for each character
+let letterGridOffsets = {}; // dla chaosu siatki liter
+let letterDimensions = {}; // stores {cols, rows} for each character
+let currentLetter = 'A';
+let letterP5;
+
+// --- SHARED PARAMETERS ---
+let params = {
+  R_MAIN: 30,
+  R_OVER: 115,
+  R_CONNECT: 22,
+  R_HOLE_NODE: 11,
+  R_HOLE_PAIR: 17,
+  R_HOLE_BIG: 30,
+  R_DOT: 4,
+  CHAOS: 0,
+  animate: false
+};
+
+// --- CAMERA ---
+let cameraEnabled = false;
+let cameraStream = null;
+let cameraVideo = null;
+
+// Characters for font
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  initGrids();
+  initLetterNav();
+  initSliders();
+  initButtons();
+  
+  // Initialize paper.js
+  const paperCanvas = document.createElement('canvas');
+  paperCanvas.width = 100;
+  paperCanvas.height = 100;
+  paper.setup(paperCanvas);
+  
+  // Create p5 instances
+  compP5 = new p5(compositionSketch, 'composition-canvas');
+  letterP5 = new p5(letterSketch, 'letter-canvas');
+});
+
+function initGrids() {
+  // Composition grid
+  compGrid = [];
+  compBigNode = [];
+  compGridOffsets = [];
+  for (let x = 0; x < compCols; x++) {
+    compGrid[x] = [];
+    compBigNode[x] = [];
+    compGridOffsets[x] = [];
+    for (let y = 0; y < compRows; y++) {
+      compGrid[x][y] = false;
+      compBigNode[x][y] = false;
+      // Losowe offsety dla każdego węzła (seed)
+      compGridOffsets[x][y] = {
+        dx: (Math.random() - 0.5) * 2,
+        dy: (Math.random() - 0.5) * 2
+      };
+    }
+  }
+  
+  // Letter grids for each character
+  CHARS.forEach(char => {
+    letterDimensions[char] = { cols: letterCols, rows: letterRows };
+    letterGrids[char] = [];
+    letterBigNodes[char] = [];
+    letterGridOffsets[char] = [];
+    for (let x = 0; x < letterCols; x++) {
+      letterGrids[char][x] = [];
+      letterBigNodes[char][x] = [];
+      letterGridOffsets[char][x] = [];
+      for (let y = 0; y < letterRows; y++) {
+        letterGrids[char][x][y] = false;
+        letterBigNodes[char][x][y] = false;
+        letterGridOffsets[char][x][y] = {
+          dx: (Math.random() - 0.5) * 2,
+          dy: (Math.random() - 0.5) * 2
+        };
+      }
+    }
+  });
+  
+  // Load preset alphabet
+  loadPresetAlphabet();
+}
+
+function loadPresetAlphabet() {
+  // Format: array of [x, y] coordinates for active nodes
+  // Grid is 5 columns (0-4) x 5 rows (0-4)
+  // Brutal minimalist 5x5 alphabet
+  
+  const presets = {
+    'A': {
+      nodes: [[2,4], [1,3],[3,3], [0,2],[1,2],[2,2],[3,2],[4,2], [0,1],[4,1], [0,0],[4,0]],
+      big: [[2,4]]
+    },
+    'B': {
+      nodes: [[0,4],[1,4],[2,4],[3,4], [0,3],[4,3], [0,2],[1,2],[2,2],[3,2], [0,1],[4,1], [0,0],[1,0],[2,0],[3,0]],
+      big: []
+    },
+    'C': {
+      nodes: [[1,4],[2,4],[3,4],[4,4], [0,3], [0,2], [0,1], [1,0],[2,0],[3,0],[4,0]],
+      big: [[4,4],[4,0]]
+    },
+    'D': {
+      nodes: [[0,4],[1,4],[2,4],[3,4], [0,3],[4,3], [0,2],[4,2], [0,1],[4,1], [0,0],[1,0],[2,0],[3,0]],
+      big: []
+    },
+    'E': {
+      nodes: [[0,4],[1,4],[2,4],[3,4],[4,4], [0,3], [0,2],[1,2],[2,2],[3,2], [0,1], [0,0],[1,0],[2,0],[3,0],[4,0]],
+      big: []
+    },
+    'F': {
+      nodes: [[0,4],[1,4],[2,4],[3,4],[4,4], [0,3], [0,2],[1,2],[2,2], [0,1], [0,0]],
+      big: []
+    },
+    'G': {
+      nodes: [[1,4],[2,4],[3,4],[4,4], [0,3], [0,2],[2,2],[3,2],[4,2], [0,1],[4,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    'H': {
+      nodes: [[0,4],[4,4], [0,3],[4,3], [0,2],[1,2],[2,2],[3,2],[4,2], [0,1],[4,1], [0,0],[4,0]],
+      big: []
+    },
+    'I': {
+      nodes: [[1,4],[2,4],[3,4], [2,3], [2,2], [2,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    'J': {
+      nodes: [[2,4],[3,4],[4,4], [3,3], [3,2], [0,1],[3,1], [1,0],[2,0]],
+      big: [[0,1]]
+    },
+    'K': {
+      nodes: [[0,4],[4,4], [0,3],[3,3], [0,2],[1,2],[2,2], [0,1],[3,1], [0,0],[4,0]],
+      big: [[4,4],[4,0]]
+    },
+    'L': {
+      nodes: [[0,4], [0,3], [0,2], [0,1], [0,0],[1,0],[2,0],[3,0],[4,0]],
+      big: []
+    },
+    'M': {
+      nodes: [[0,4],[4,4], [0,3],[1,3],[3,3],[4,3], [0,2],[2,2],[4,2], [0,1],[4,1], [0,0],[4,0]],
+      big: [[0,4],[4,4]]
+    },
+    'N': {
+      nodes: [[0,4],[4,4], [0,3],[1,3],[4,3], [0,2],[2,2],[4,2], [0,1],[3,1],[4,1], [0,0],[4,0]],
+      big: []
+    },
+    'O': {
+      nodes: [[1,4],[2,4],[3,4], [0,3],[4,3], [0,2],[4,2], [0,1],[4,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    'P': {
+      nodes: [[0,4],[1,4],[2,4],[3,4], [0,3],[4,3], [0,2],[1,2],[2,2],[3,2], [0,1], [0,0]],
+      big: []
+    },
+    'Q': {
+      nodes: [[1,4],[2,4],[3,4], [0,3],[4,3], [0,2],[4,2], [0,1],[3,1],[4,1], [1,0],[2,0],[4,0]],
+      big: [[4,0]]
+    },
+    'R': {
+      nodes: [[0,4],[1,4],[2,4],[3,4], [0,3],[4,3], [0,2],[1,2],[2,2],[3,2], [0,1],[3,1], [0,0],[4,0]],
+      big: [[4,0]]
+    },
+    'S': {
+      nodes: [[1,4],[2,4],[3,4],[4,4], [0,3], [1,2],[2,2],[3,2], [4,1], [0,0],[1,0],[2,0],[3,0]],
+      big: [[0,3],[4,1]]
+    },
+    'T': {
+      nodes: [[0,4],[1,4],[2,4],[3,4],[4,4], [2,3], [2,2], [2,1], [2,0]],
+      big: [[0,4],[4,4]]
+    },
+    'U': {
+      nodes: [[0,4],[4,4], [0,3],[4,3], [0,2],[4,2], [0,1],[4,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    'V': {
+      nodes: [[0,4],[4,4], [0,3],[4,3], [1,2],[3,2], [1,1],[3,1], [2,0]],
+      big: [[0,4],[4,4]]
+    },
+    'W': {
+      nodes: [[0,4],[4,4], [0,3],[4,3], [0,2],[2,2],[4,2], [0,1],[1,1],[3,1],[4,1], [1,0],[3,0]],
+      big: [[0,4],[4,4]]
+    },
+    'X': {
+      nodes: [[0,4],[4,4], [1,3],[3,3], [2,2], [1,1],[3,1], [0,0],[4,0]],
+      big: [[0,4],[4,4],[0,0],[4,0]]
+    },
+    'Y': {
+      nodes: [[0,4],[4,4], [1,3],[3,3], [2,2], [2,1], [2,0]],
+      big: [[0,4],[4,4]]
+    },
+    'Z': {
+      nodes: [[0,4],[1,4],[2,4],[3,4],[4,4], [3,3], [2,2], [1,1], [0,0],[1,0],[2,0],[3,0],[4,0]],
+      big: []
+    },
+    '0': {
+      nodes: [[1,4],[2,4],[3,4], [0,3],[3,3],[4,3], [0,2],[2,2],[4,2], [0,1],[1,1],[4,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    '1': {
+      nodes: [[1,4],[2,4], [2,3], [2,2], [2,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    '2': {
+      nodes: [[0,4],[1,4],[2,4],[3,4], [4,3], [2,2],[3,2], [1,1], [0,0],[1,0],[2,0],[3,0],[4,0]],
+      big: [[0,4]]
+    },
+    '3': {
+      nodes: [[0,4],[1,4],[2,4],[3,4], [4,3], [2,2],[3,2], [4,1], [0,0],[1,0],[2,0],[3,0]],
+      big: [[0,4],[0,0]]
+    },
+    '4': {
+      nodes: [[0,4],[4,4], [0,3],[4,3], [0,2],[1,2],[2,2],[3,2],[4,2], [4,1], [4,0]],
+      big: []
+    },
+    '5': {
+      nodes: [[0,4],[1,4],[2,4],[3,4],[4,4], [0,3], [0,2],[1,2],[2,2],[3,2], [4,1], [0,0],[1,0],[2,0],[3,0]],
+      big: [[0,0]]
+    },
+    '6': {
+      nodes: [[2,4],[3,4],[4,4], [1,3], [0,2],[1,2],[2,2],[3,2], [0,1],[4,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    '7': {
+      nodes: [[0,4],[1,4],[2,4],[3,4],[4,4], [4,3], [3,2], [2,1], [2,0]],
+      big: [[0,4]]
+    },
+    '8': {
+      nodes: [[1,4],[2,4],[3,4], [0,3],[4,3], [1,2],[2,2],[3,2], [0,1],[4,1], [1,0],[2,0],[3,0]],
+      big: []
+    },
+    '9': {
+      nodes: [[1,4],[2,4],[3,4], [0,3],[4,3], [1,2],[2,2],[3,2],[4,2], [3,1], [0,0],[1,0],[2,0]],
+      big: []
+    }
+  };
+  
+  // Apply presets
+  for (const char in presets) {
+    const preset = presets[char];
+    const grid = letterGrids[char];
+    const bigNode = letterBigNodes[char];
+    
+    if (!grid) continue;
+    
+    // Set active nodes (flip Y: 4-y because I designed with Y=0 at bottom)
+    preset.nodes.forEach(([x, y]) => {
+      const flippedY = 4 - y;
+      if (grid[x] && flippedY >= 0 && flippedY < letterRows) {
+        grid[x][flippedY] = true;
+      }
+    });
+    
+    // Set big nodes (overshoot)
+    preset.big.forEach(([x, y]) => {
+      const flippedY = 4 - y;
+      if (bigNode[x] && flippedY >= 0 && flippedY < letterRows) {
+        bigNode[x][flippedY] = true;
+      }
+    });
+  }
+}
+
+// WIDE FONT PRESET - 9x5 grid
+const WIDE_PRESET = {
+  'A': {
+    nodes: [[3,4],[4,4],[5,4],[2,3],[6,3],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[0,1],[7,1],[0,0],[8,0]],
+    big: [[0,0],[8,0]]
+  },
+  'B': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[0,3],[7,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[0,1],[7,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  'C': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[1,3],[0,3],[0,2],[0,1],[1,1],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],
+    big: [[8,4],[8,0]]
+  },
+  'D': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[0,3],[7,3],[0,2],[8,2],[0,1],[7,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  'E': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[0,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],
+    big: []
+  },
+  'F': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[0,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[0,1],[0,0]],
+    big: []
+  },
+  'G': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[1,3],[0,3],[0,2],[4,2],[5,2],[6,2],[7,2],[8,2],[0,1],[1,1],[8,1],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0]],
+    big: []
+  },
+  'H': {
+    nodes: [[0,4],[8,4],[0,3],[8,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[0,1],[8,1],[0,0],[8,0]],
+    big: []
+  },
+  'I': {
+    nodes: [[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[4,3],[4,2],[4,1],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0]],
+    big: []
+  },
+  'J': {
+    nodes: [[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[6,3],[6,2],[0,1],[1,1],[6,1],[2,0],[3,0],[4,0],[5,0]],
+    big: [[0,1]]
+  },
+  'K': {
+    nodes: [[0,4],[7,4],[8,4],[0,3],[5,3],[6,3],[0,2],[1,2],[2,2],[3,2],[4,2],[0,1],[5,1],[6,1],[0,0],[7,0],[8,0]],
+    big: [[8,4],[8,0]]
+  },
+  'L': {
+    nodes: [[0,4],[0,3],[0,2],[0,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],
+    big: []
+  },
+  'M': {
+    nodes: [[0,4],[1,4],[7,4],[8,4],[0,3],[2,3],[6,3],[8,3],[0,2],[3,2],[4,2],[5,2],[8,2],[0,1],[8,1],[0,0],[8,0]],
+    big: [[0,4],[8,4]]
+  },
+  'N': {
+    nodes: [[0,4],[1,4],[8,4],[0,3],[2,3],[3,3],[8,3],[0,2],[4,2],[8,2],[0,1],[5,1],[6,1],[8,1],[0,0],[7,0],[8,0]],
+    big: []
+  },
+  'O': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[1,3],[7,3],[0,2],[8,2],[1,1],[7,1],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  'P': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[0,3],[7,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[0,1],[0,0]],
+    big: []
+  },
+  'Q': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[1,3],[7,3],[0,2],[8,2],[1,1],[5,1],[6,1],[7,1],[2,0],[3,0],[4,0],[8,0]],
+    big: [[8,0]]
+  },
+  'R': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[0,3],[7,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[0,1],[5,1],[6,1],[0,0],[7,0],[8,0]],
+    big: [[8,0]]
+  },
+  'S': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[1,3],[0,3],[2,2],[3,2],[4,2],[5,2],[6,2],[7,1],[8,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: [[0,3],[8,1]]
+  },
+  'T': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[4,3],[4,2],[4,1],[4,0]],
+    big: [[0,4],[8,4]]
+  },
+  'U': {
+    nodes: [[0,4],[8,4],[0,3],[8,3],[0,2],[8,2],[1,1],[7,1],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  'V': {
+    nodes: [[0,4],[8,4],[1,3],[7,3],[2,2],[6,2],[3,1],[5,1],[4,0]],
+    big: [[0,4],[8,4]]
+  },
+  'W': {
+    nodes: [[0,4],[8,4],[0,3],[8,3],[0,2],[3,2],[4,2],[5,2],[8,2],[1,1],[2,1],[6,1],[7,1],[1,0],[7,0]],
+    big: [[1,0],[7,0]]
+  },
+  'X': {
+    nodes: [[0,4],[1,4],[7,4],[8,4],[2,3],[6,3],[3,2],[4,2],[5,2],[2,1],[6,1],[0,0],[1,0],[7,0],[8,0]],
+    big: []
+  },
+  'Y': {
+    nodes: [[0,4],[8,4],[1,3],[7,3],[2,2],[3,2],[4,2],[5,2],[6,2],[4,1],[4,0]],
+    big: [[0,4],[8,4]]
+  },
+  'Z': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[6,3],[7,3],[4,2],[5,2],[1,1],[2,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],
+    big: []
+  },
+  '0': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[1,3],[5,3],[6,3],[7,3],[0,2],[3,2],[4,2],[8,2],[1,1],[2,1],[3,1],[7,1],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  '1': {
+    nodes: [[2,4],[3,4],[4,4],[4,3],[4,2],[4,1],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0]],
+    big: [[2,4]]
+  },
+  '2': {
+    nodes: [[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[0,3],[8,3],[5,2],[6,2],[7,2],[2,1],[3,1],[4,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],[8,0]],
+    big: [[0,3]]
+  },
+  '3': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[7,3],[8,3],[3,2],[4,2],[5,2],[6,2],[7,2],[7,1],[8,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0]],
+    big: [[0,4],[8,1]]
+  },
+  '4': {
+    nodes: [[0,4],[6,4],[0,3],[6,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[6,1],[6,0]],
+    big: []
+  },
+  '5': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[0,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,1],[8,1],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0]],
+    big: [[0,3],[8,1]]
+  },
+  '6': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[1,3],[0,3],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[0,1],[7,1],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  '7': {
+    nodes: [[0,4],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[8,4],[7,3],[8,3],[5,2],[6,2],[4,1],[3,0],[4,0]],
+    big: [[0,4]]
+  },
+  '8': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[1,3],[7,3],[2,2],[3,2],[4,2],[5,2],[6,2],[1,1],[7,1],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  },
+  '9': {
+    nodes: [[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[1,3],[8,3],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[7,1],[8,1],[1,0],[2,0],[3,0],[4,0],[5,0],[6,0]],
+    big: []
+  }
+};
+
+function loadWidePreset() {
+  const wideCols = 9;
+  const wideRows = 5;
+  
+  // Reset all letters with new dimensions
+  CHARS.forEach(char => {
+    letterDimensions[char] = { cols: wideCols, rows: wideRows };
+    letterGrids[char] = [];
+    letterBigNodes[char] = [];
+    letterGridOffsets[char] = [];
+    
+    for (let x = 0; x < wideCols; x++) {
+      letterGrids[char][x] = [];
+      letterBigNodes[char][x] = [];
+      letterGridOffsets[char][x] = [];
+      for (let y = 0; y < wideRows; y++) {
+        letterGrids[char][x][y] = false;
+        letterBigNodes[char][x][y] = false;
+        letterGridOffsets[char][x][y] = {
+          dx: (Math.random() - 0.5) * 2,
+          dy: (Math.random() - 0.5) * 2
+        };
+      }
+    }
+    
+    // Load preset data
+    const preset = WIDE_PRESET[char];
+    if (preset) {
+      preset.nodes.forEach(([x, y]) => {
+        const flippedY = (wideRows - 1) - y;
+        if (x >= 0 && x < wideCols && flippedY >= 0 && flippedY < wideRows) {
+          letterGrids[char][x][flippedY] = true;
+        }
+      });
+      
+      preset.big.forEach(([x, y]) => {
+        const flippedY = (wideRows - 1) - y;
+        if (x >= 0 && x < wideCols && flippedY >= 0 && flippedY < wideRows) {
+          letterBigNodes[char][x][flippedY] = true;
+        }
+      });
+    }
+  });
+  
+  // Update canvas and UI
+  updateLetterCanvasSize();
+  updateLettersDone();
+  updateTextPreview();
+}
+
+function loadDefaultPreset() {
+  letterCols = 5;
+  letterRows = 5;
+  initGrids();
+  updateLetterCanvasSize();
+  updateLettersDone();
+  updateTextPreview();
+}
+
+function initLetterNav() {
+  const nav = document.getElementById('letter-nav');
+  CHARS.forEach(char => {
+    const btn = document.createElement('button');
+    btn.className = 'letter-btn' + (char === currentLetter ? ' active' : '');
+    btn.textContent = char;
+    btn.onclick = () => selectLetter(char);
+    nav.appendChild(btn);
+  });
+}
+
+function selectLetter(char) {
+  currentLetter = char;
+  document.querySelectorAll('.letter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === char);
+  });
+  document.getElementById('current-letter-info').textContent = 'Litera: ' + char;
+  updateLetterCanvasSize();
+  updateLettersDone();
+  updateTextPreview();
+}
+
+function updateLetterCanvasSize() {
+  const dims = letterDimensions[currentLetter] || { cols: letterCols, rows: letterRows };
+  if (letterP5) {
+    const w = MARGIN * 2 + SPACING * (dims.cols - 1);
+    const h = MARGIN * 2 + SPACING * (dims.rows - 1);
+    letterP5.resizeCanvas(w, h);
+  }
+  // Update the grid info display
+  const gridInfo = document.getElementById('letter-grid-info');
+  if (gridInfo) {
+    gridInfo.textContent = `Grid: ${dims.cols}x${dims.rows}`;
+  }
+}
+
+function getLetterDims(char) {
+  return letterDimensions[char] || { cols: letterCols, rows: letterRows };
+}
+
+function initSliders() {
+  const sliders = [
+    { id: 'slider-main', param: 'R_MAIN', valId: 'val-main' },
+    { id: 'slider-over', param: 'R_OVER', valId: 'val-over', suffix: '%' },
+    { id: 'slider-connect', param: 'R_CONNECT', valId: 'val-connect' },
+    { id: 'slider-hole-node', param: 'R_HOLE_NODE', valId: 'val-hole-node' },
+    { id: 'slider-hole-pair', param: 'R_HOLE_PAIR', valId: 'val-hole-pair' },
+    { id: 'slider-hole-big', param: 'R_HOLE_BIG', valId: 'val-hole-big' },
+    { id: 'slider-dot', param: 'R_DOT', valId: 'val-dot' },
+    { id: 'slider-chaos', param: 'CHAOS', valId: 'val-chaos' }
+  ];
+  
+  sliders.forEach(s => {
+    const slider = document.getElementById(s.id);
+    const valEl = document.getElementById(s.valId);
+    
+    slider.oninput = () => {
+      params[s.param] = parseFloat(slider.value);
+      valEl.textContent = slider.value + (s.suffix || '');
+      updateTextPreview();
+    };
+  });
+  
+  document.getElementById('anim-check').onchange = (e) => {
+    params.animate = e.target.checked;
+  };
+  
+  document.getElementById('camera-check').onchange = async (e) => {
+    if (e.target.checked) {
+      await startCamera();
+    } else {
+      stopCamera();
+    }
+  };
+}
+
+async function startCamera() {
+  try {
+    cameraVideo = document.getElementById('camera-video');
+    cameraStream = await navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: 'user',
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      } 
+    });
+    cameraVideo.srcObject = cameraStream;
+    cameraEnabled = true;
+    console.log('Camera started');
+  } catch (err) {
+    console.error('Camera error:', err);
+    alert('Nie można uruchomić kamery: ' + err.message);
+    document.getElementById('camera-check').checked = false;
+    cameraEnabled = false;
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+  cameraEnabled = false;
+  console.log('Camera stopped');
+}
+
+function getCameraBrightness(x, y, video, canvas) {
+  // Sample brightness from video at grid position
+  if (!video || !video.videoWidth) return 0.5;
+  
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+  const cw = canvas.width;
+  const ch = canvas.height;
+  
+  // Map canvas coords to video coords (mirror horizontally)
+  const vx = Math.floor((1 - x / cw) * vw);
+  const vy = Math.floor((y / ch) * vh);
+  
+  // Create temporary canvas to sample pixel
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = vw;
+  tempCanvas.height = vh;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.drawImage(video, 0, 0, vw, vh);
+  
+  // Get pixel data
+  const pixel = tempCtx.getImageData(vx, vy, 1, 1).data;
+  const brightness = (pixel[0] + pixel[1] + pixel[2]) / (3 * 255);
+  
+  return brightness;
+}
+
+function initButtons() {
+  document.getElementById('btn-random').onclick = generateRandomComposition;
+  document.getElementById('btn-clear-comp').onclick = clearComposition;
+  document.getElementById('btn-export-svg').onclick = () => exportSVG('composition');
+  
+  document.getElementById('btn-clear-letter').onclick = clearCurrentLetter;
+  document.getElementById('btn-copy-from-comp').onclick = copyFromComposition;
+  document.getElementById('btn-export-ttf').onclick = exportTTF;
+  
+  document.getElementById('preview-text').oninput = updateTextPreview;
+  
+  // Resize buttons
+  document.getElementById('btn-resize-comp').onclick = resizeComposition;
+  document.getElementById('btn-resize-letter').onclick = resizeLetterGrid;
+  
+  // TTF Import
+  document.getElementById('btn-import-ttf').onclick = () => document.getElementById('ttf-import').click();
+  document.getElementById('btn-import-all').onclick = importAllLetters;
+  document.getElementById('ttf-import').onchange = handleTTFImport;
+  document.getElementById('import-threshold').oninput = (e) => {
+    document.getElementById('val-threshold').textContent = e.target.value;
+  };
+  
+  // Presets
+  document.getElementById('btn-preset-wide').onclick = loadWidePreset;
+  document.getElementById('btn-preset-default').onclick = loadDefaultPreset;
+}
+
+let importedFont = null;
+
+function handleTTFImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      importedFont = opentype.parse(evt.target.result);
+      console.log('Font loaded:', importedFont.names.fontFamily);
+      alert('Font loaded: ' + (importedFont.names.fontFamily?.en || 'Unknown') + '\nClick "Import all letters" to convert.');
+    } catch (err) {
+      alert('Error loading font: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function importAllLetters() {
+  if (!importedFont) {
+    alert('First load a TTF file!');
+    return;
+  }
+  
+  const threshold = parseFloat(document.getElementById('import-threshold').value);
+  
+  CHARS.forEach(char => {
+    importLetterFromFont(char, threshold);
+  });
+  
+  updateLettersDone();
+  updateTextPreview();
+  alert('All letters imported!');
+}
+
+function importLetterFromFont(char, threshold) {
+  const glyph = importedFont.charToGlyph(char);
+  if (!glyph || !glyph.path) return;
+  
+  // Get glyph bounds
+  const bbox = glyph.getBoundingBox();
+  const glyphW = bbox.x2 - bbox.x1;
+  const glyphH = bbox.y2 - bbox.y1;
+  
+  if (glyphW === 0 || glyphH === 0) return;
+  
+  // Calculate optimal grid dimensions based on glyph proportions
+  const aspectRatio = glyphW / glyphH;
+  const baseSize = 10; // base height
+  const minCols = 3;
+  const maxCols = 12;
+  const minRows = 6;
+  const maxRows = 14;
+  
+  // Calculate cols based on aspect ratio, keeping rows at baseSize
+  let newRows = baseSize;
+  let newCols = Math.round(baseSize * aspectRatio);
+  
+  // Clamp values
+  newCols = Math.max(minCols, Math.min(maxCols, newCols));
+  newRows = Math.max(minRows, Math.min(maxRows, newRows));
+  
+  // Store dimensions for this letter
+  letterDimensions[char] = { cols: newCols, rows: newRows };
+  
+  // Reinitialize grid for this letter with new dimensions
+  letterGrids[char] = [];
+  letterBigNodes[char] = [];
+  letterGridOffsets[char] = [];
+  
+  for (let x = 0; x < newCols; x++) {
+    letterGrids[char][x] = [];
+    letterBigNodes[char][x] = [];
+    letterGridOffsets[char][x] = [];
+    for (let y = 0; y < newRows; y++) {
+      letterGrids[char][x][y] = false;
+      letterBigNodes[char][x][y] = false;
+      letterGridOffsets[char][x][y] = {
+        dx: (Math.random() - 0.5) * 2,
+        dy: (Math.random() - 0.5) * 2
+      };
+    }
+  }
+  
+  const grid = letterGrids[char];
+  const bigNode = letterBigNodes[char];
+  
+  // Sample points on the grid
+  for (let gx = 0; gx < newCols; gx++) {
+    for (let gy = 0; gy < newRows; gy++) {
+      // Map grid position to glyph coordinates
+      const glyphX = bbox.x1 + (gx / (newCols - 1)) * glyphW;
+      const glyphY = bbox.y1 + ((newRows - 1 - gy) / (newRows - 1)) * glyphH;
+      
+      // Sample multiple points around the grid position
+      const sampleRadius = Math.min(glyphW, glyphH) / (Math.max(newCols, newRows) * 2);
+      let insideCount = 0;
+      const samples = 9;
+      
+      for (let sx = -1; sx <= 1; sx++) {
+        for (let sy = -1; sy <= 1; sy++) {
+          const testX = glyphX + sx * sampleRadius * 0.5;
+          const testY = glyphY + sy * sampleRadius * 0.5;
+          
+          if (isPointInsideGlyph(glyph, testX, testY)) {
+            insideCount++;
+          }
+        }
+      }
+      
+      // If enough samples are inside, activate this node
+      if (insideCount / samples >= threshold) {
+        grid[gx][gy] = true;
+        
+        // Mark as big node if very solidly inside at extremes
+        if (insideCount / samples > 0.8) {
+          if (gy === 0 || gy === newRows - 1) {
+            bigNode[gx][gy] = true;
+          }
+        }
+      }
+    }
+  }
+  
+  // If this is the current letter, update canvas size
+  if (char === currentLetter) {
+    updateLetterCanvasSize();
+  }
+}
+
+function isPointInsideGlyph(glyph, x, y) {
+  // Use path winding number algorithm
+  const path = glyph.path;
+  if (!path.commands || path.commands.length === 0) return false;
+  
+  let windingNumber = 0;
+  let prevX = 0, prevY = 0;
+  let startX = 0, startY = 0;
+  
+  for (const cmd of path.commands) {
+    if (cmd.type === 'M') {
+      startX = prevX = cmd.x;
+      startY = prevY = cmd.y;
+    } else if (cmd.type === 'L') {
+      windingNumber += crossingNumber(prevX, prevY, cmd.x, cmd.y, x, y);
+      prevX = cmd.x;
+      prevY = cmd.y;
+    } else if (cmd.type === 'Q') {
+      // Quadratic bezier - sample it
+      for (let t = 0.1; t <= 1; t += 0.1) {
+        const nx = (1-t)*(1-t)*prevX + 2*(1-t)*t*cmd.x1 + t*t*cmd.x;
+        const ny = (1-t)*(1-t)*prevY + 2*(1-t)*t*cmd.y1 + t*t*cmd.y;
+        windingNumber += crossingNumber(prevX, prevY, nx, ny, x, y);
+        prevX = nx;
+        prevY = ny;
+      }
+      prevX = cmd.x;
+      prevY = cmd.y;
+    } else if (cmd.type === 'C') {
+      // Cubic bezier - sample it
+      for (let t = 0.1; t <= 1; t += 0.1) {
+        const nx = (1-t)*(1-t)*(1-t)*prevX + 3*(1-t)*(1-t)*t*cmd.x1 + 3*(1-t)*t*t*cmd.x2 + t*t*t*cmd.x;
+        const ny = (1-t)*(1-t)*(1-t)*prevY + 3*(1-t)*(1-t)*t*cmd.y1 + 3*(1-t)*t*t*cmd.y2 + t*t*t*cmd.y;
+        windingNumber += crossingNumber(prevX, prevY, nx, ny, x, y);
+        prevX = nx;
+        prevY = ny;
+      }
+      prevX = cmd.x;
+      prevY = cmd.y;
+    } else if (cmd.type === 'Z') {
+      windingNumber += crossingNumber(prevX, prevY, startX, startY, x, y);
+      prevX = startX;
+      prevY = startY;
+    }
+  }
+  
+  return windingNumber !== 0;
+}
+
+function crossingNumber(x1, y1, x2, y2, px, py) {
+  // Check if horizontal ray from (px, py) crosses the line segment
+  if ((y1 <= py && y2 > py) || (y1 > py && y2 <= py)) {
+    const intersectX = x1 + (py - y1) / (y2 - y1) * (x2 - x1);
+    if (px < intersectX) {
+      return (y2 > y1) ? 1 : -1;
+    }
+  }
+  return 0;
+}
+
+function resizeComposition() {
+  const newCols = parseInt(document.getElementById('comp-cols').value) || 16;
+  const newRows = parseInt(document.getElementById('comp-rows').value) || 12;
+  
+  // Preserve existing data where possible
+  const oldGrid = compGrid;
+  const oldBigNode = compBigNode;
+  const oldOffsets = compGridOffsets;
+  
+  compCols = Math.max(4, Math.min(32, newCols));
+  compRows = Math.max(4, Math.min(24, newRows));
+  
+  compGrid = [];
+  compBigNode = [];
+  compGridOffsets = [];
+  
+  for (let x = 0; x < compCols; x++) {
+    compGrid[x] = [];
+    compBigNode[x] = [];
+    compGridOffsets[x] = [];
+    for (let y = 0; y < compRows; y++) {
+      compGrid[x][y] = (oldGrid[x] && oldGrid[x][y]) || false;
+      compBigNode[x][y] = (oldBigNode[x] && oldBigNode[x][y]) || false;
+      compGridOffsets[x][y] = (oldOffsets[x] && oldOffsets[x][y]) || {
+        dx: (Math.random() - 0.5) * 2,
+        dy: (Math.random() - 0.5) * 2
+      };
+    }
+  }
+  
+  // Resize canvas
+  if (compP5) {
+    const w = MARGIN * 2 + SPACING * (compCols - 1);
+    const h = MARGIN * 2 + SPACING * (compRows - 1);
+    compP5.resizeCanvas(w, h);
+  }
+}
+
+function resizeLetterGrid() {
+  const newCols = parseInt(document.getElementById('letter-cols').value) || 8;
+  const newRows = parseInt(document.getElementById('letter-rows').value) || 10;
+  
+  letterCols = Math.max(4, Math.min(16, newCols));
+  letterRows = Math.max(4, Math.min(16, newRows));
+  
+  // Resize all letter grids
+  CHARS.forEach(char => {
+    const oldGrid = letterGrids[char];
+    const oldBigNode = letterBigNodes[char];
+    const oldOffsets = letterGridOffsets[char];
+    
+    letterGrids[char] = [];
+    letterBigNodes[char] = [];
+    letterGridOffsets[char] = [];
+    
+    for (let x = 0; x < letterCols; x++) {
+      letterGrids[char][x] = [];
+      letterBigNodes[char][x] = [];
+      letterGridOffsets[char][x] = [];
+      for (let y = 0; y < letterRows; y++) {
+        letterGrids[char][x][y] = (oldGrid[x] && oldGrid[x][y]) || false;
+        letterBigNodes[char][x][y] = (oldBigNode[x] && oldBigNode[x][y]) || false;
+        letterGridOffsets[char][x][y] = (oldOffsets[x] && oldOffsets[x][y]) || {
+          dx: (Math.random() - 0.5) * 2,
+          dy: (Math.random() - 0.5) * 2
+        };
+      }
+    }
+    
+    // Update letterDimensions for this character
+    letterDimensions[char] = { cols: letterCols, rows: letterRows };
+  });
+  
+  // Resize canvas
+  if (letterP5) {
+    const w = MARGIN * 2 + SPACING * (letterCols - 1);
+    const h = MARGIN * 2 + SPACING * (letterRows - 1);
+    letterP5.resizeCanvas(w, h);
+  }
+  
+  // Update status bar
+  document.getElementById('letter-grid-info').textContent = `Grid: ${letterCols}×${letterRows}`;
+  updateTextPreview();
+}
+
+// ============================================================
+// COMPOSITION SKETCH (p5 instance)
+// ============================================================
+
+function compositionSketch(p) {
+  let w, h;
+  
+  p.setup = function() {
+    w = MARGIN * 2 + SPACING * (compCols - 1);
+    h = MARGIN * 2 + SPACING * (compRows - 1);
+    p.createCanvas(w, h);
+  };
+  
+  p.draw = function() {
+    const r = getDrawRadii(p);
+    p.background(255);
+    
+    // Draw camera raster if enabled
+    if (cameraEnabled && cameraVideo && cameraVideo.readyState >= 2) {
+      drawCameraRaster(p, r);
+    } else {
+      drawGrid(p, compGrid, compBigNode, compCols, compRows, r, compGridOffsets);
+    }
+  };
+  
+  p.mousePressed = function() {
+    if (p.mouseX < 0 || p.mouseX > p.width || p.mouseY < 0 || p.mouseY > p.height) return;
+    
+    let gx = Math.round((p.mouseX - MARGIN) / SPACING);
+    let gy = Math.round((p.mouseY - MARGIN) / SPACING);
+    
+    if (gx < 0 || gx >= compCols || gy < 0 || gy >= compRows) return;
+    
+    if (p.keyIsDown(p.SHIFT)) {
+      compBigNode[gx][gy] = !compBigNode[gx][gy];
+      compGrid[gx][gy] = true;
+    } else {
+      compGrid[gx][gy] = !compGrid[gx][gy];
+      if (!compGrid[gx][gy]) compBigNode[gx][gy] = false;
+    }
+  };
+}
+
+function drawCameraRaster(p, r) {
+  const video = cameraVideo;
+  
+  if (!video || video.videoWidth === 0) {
+    p.fill(100);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.textSize(14);
+    p.noStroke();
+    p.text('Ladowanie kamery...', p.width/2, p.height/2);
+    return;
+  }
+  
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+  
+  // Create temporary canvas for sampling
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = vw;
+  tempCanvas.height = vh;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  // Draw mirrored
+  tempCtx.translate(vw, 0);
+  tempCtx.scale(-1, 1);
+  tempCtx.drawImage(video, 0, 0, vw, vh);
+  
+  const imageData = tempCtx.getImageData(0, 0, vw, vh);
+  const pixels = imageData.data;
+  
+  // Draw small video preview in corner
+  p.push();
+  p.drawingContext.drawImage(tempCanvas, 10, 10, 100, 75);
+  p.pop();
+  p.noFill();
+  p.stroke(0);
+  p.strokeWeight(1);
+  p.rect(10, 10, 100, 75);
+  
+  p.noStroke();
+  
+  // Draw circles based on brightness
+  for (let gx = 0; gx < compCols; gx++) {
+    for (let gy = 0; gy < compRows; gy++) {
+      const { x: cx, y: cy } = gridToCanvas(gx, gy, compGridOffsets);
+      
+      // Map grid position to video
+      const vx = Math.floor((gx / (compCols - 1)) * (vw - 1));
+      const vy = Math.floor((gy / (compRows - 1)) * (vh - 1));
+      
+      // Get pixel brightness
+      const idx = (vy * vw + vx) * 4;
+      const rr = pixels[idx] || 128;
+      const gg = pixels[idx + 1] || 128;
+      const bb = pixels[idx + 2] || 128;
+      const brightness = (rr + gg + bb) / (3 * 255);
+      
+      // Invert: dark = big circle
+      const size = 1 - brightness;
+      const radius = r.main * size * 1.3;
+      
+      if (radius > 2) {
+        p.fill(0);
+        p.ellipse(cx, cy, radius * 2, radius * 2);
+        
+        // Connections
+        const threshold = 0.2;
+        if (size > threshold) {
+          // Right
+          if (gx < compCols - 1) {
+            const vx2 = Math.floor(((gx + 1) / (compCols - 1)) * (vw - 1));
+            const idx2 = (vy * vw + vx2) * 4;
+            const s2 = 1 - (pixels[idx2] + pixels[idx2+1] + pixels[idx2+2]) / (3 * 255);
+            if (s2 > threshold) {
+              const { x: cx2, y: cy2 } = gridToCanvas(gx + 1, gy, compGridOffsets);
+              drawCapsule(p, cx, cy, cx2, cy2, r.connect * Math.min(size, s2));
+            }
+          }
+          // Down
+          if (gy < compRows - 1) {
+            const vy2 = Math.floor(((gy + 1) / (compRows - 1)) * (vh - 1));
+            const idx2 = (vy2 * vw + vx) * 4;
+            const s2 = 1 - (pixels[idx2] + pixels[idx2+1] + pixels[idx2+2]) / (3 * 255);
+            if (s2 > threshold) {
+              const { x: cx2, y: cy2 } = gridToCanvas(gx, gy + 1, compGridOffsets);
+              drawCapsule(p, cx, cy, cx2, cy2, r.connect * Math.min(size, s2));
+            }
+          }
+        }
+      }
+      
+      // Holes
+      if (r.holeNode > 0.1 && radius > 4) {
+        p.fill(255);
+        p.ellipse(cx, cy, r.holeNode * 2 * size, r.holeNode * 2 * size);
+      }
+      
+      // Dots
+      if (r.dot > 0.1) {
+        p.fill(0);
+        p.ellipse(cx, cy, r.dot * 2, r.dot * 2);
+      }
+    }
+  }
+}
+
+// ============================================================
+// LETTER SKETCH (p5 instance)
+// ============================================================
+
+function letterSketch(p) {
+  let w, h;
+  
+  p.setup = function() {
+    const dims = getLetterDims(currentLetter);
+    w = MARGIN * 2 + SPACING * (dims.cols - 1);
+    h = MARGIN * 2 + SPACING * (dims.rows - 1);
+    p.createCanvas(w, h);
+  };
+  
+  p.draw = function() {
+    const dims = getLetterDims(currentLetter);
+    const r = getDrawRadii(p);
+    p.background(255);
+    
+    const grid = letterGrids[currentLetter];
+    const bigNode = letterBigNodes[currentLetter];
+    const offsets = letterGridOffsets[currentLetter];
+    
+    drawGrid(p, grid, bigNode, dims.cols, dims.rows, r, offsets);
+  };
+  
+  p.mousePressed = function() {
+    if (p.mouseX < 0 || p.mouseX > p.width || p.mouseY < 0 || p.mouseY > p.height) return;
+    
+    const dims = getLetterDims(currentLetter);
+    
+    let gx = Math.round((p.mouseX - MARGIN) / SPACING);
+    let gy = Math.round((p.mouseY - MARGIN) / SPACING);
+    
+    if (gx < 0 || gx >= dims.cols || gy < 0 || gy >= dims.rows) return;
+    
+    const grid = letterGrids[currentLetter];
+    const bigNode = letterBigNodes[currentLetter];
+    
+    if (p.keyIsDown(p.SHIFT)) {
+      bigNode[gx][gy] = !bigNode[gx][gy];
+      grid[gx][gy] = true;
+    } else {
+      grid[gx][gy] = !grid[gx][gy];
+      if (!grid[gx][gy]) bigNode[gx][gy] = false;
+    }
+    
+    updateLettersDone();
+    updateTextPreview();
+  };
+}
+
+// ============================================================
+// SHARED DRAWING FUNCTIONS
+// ============================================================
+
+function getDrawRadii(p) {
+  let r = {
+    main: params.R_MAIN,
+    connect: params.R_CONNECT,
+    holeNode: params.R_HOLE_NODE,
+    holePair: params.R_HOLE_PAIR,
+    holeBig: params.R_HOLE_BIG,
+    dot: params.R_DOT
+  };
+  
+  if (params.animate) {
+    const t = p.frameCount * 0.02;
+    const mod = (base, phase) => base * (1 + 0.3 * Math.sin(t + phase));
+    
+    r.main = mod(params.R_MAIN, 0);
+    r.connect = mod(params.R_CONNECT, 1);
+    r.holeNode = Math.max(0, mod(params.R_HOLE_NODE, 2.3));
+    r.holePair = Math.max(0, mod(params.R_HOLE_PAIR, 3.7));
+    r.holeBig = Math.max(0, mod(params.R_HOLE_BIG, 5.1));
+    r.dot = Math.max(0, mod(params.R_DOT, 0.8));
+  }
+  
+  const overP = (params.R_OVER + (params.animate ? 20 * Math.sin(p.frameCount * 0.014) : 0)) / 100;
+  r.mainBig = r.main * overP;
+  
+  return r;
+}
+
+function gridToCanvas(gx, gy, offsets = null) {
+  let x = MARGIN + gx * SPACING;
+  let y = MARGIN + gy * SPACING;
+  
+  // Dodaj chaos jeśli są offsety
+  if (offsets && offsets[gx] && offsets[gx][gy] && params.CHAOS > 0) {
+    const chaosAmount = params.CHAOS / 100 * SPACING * 0.8;
+    x += offsets[gx][gy].dx * chaosAmount;
+    y += offsets[gx][gy].dy * chaosAmount;
+  }
+  
+  return { x, y };
+}
+
+function drawCapsule(p, x1, y1, x2, y2, r) {
+  let cx = (x1 + x2) / 2;
+  let cy = (y1 + y2) / 2;
+  let dx = x2 - x1;
+  let dy = y2 - y1;
+  let len = Math.sqrt(dx * dx + dy * dy);
+  
+  p.push();
+  p.translate(cx, cy);
+  p.rotate(Math.atan2(dy, dx));
+  p.rectMode(p.CENTER);
+  p.rect(0, 0, len + 2 * r, 2 * r, r);
+  p.pop();
+}
+
+function drawGrid(p, grid, bigNode, cols, rows, r, offsets = null) {
+  // 1. Black circles + bridges
+  p.noStroke();
+  p.fill(0);
+  
+  for (let gx = 0; gx < cols; gx++) {
+    for (let gy = 0; gy < rows; gy++) {
+      if (!grid[gx][gy]) continue;
+      
+      const { x: x1, y: y1 } = gridToCanvas(gx, gy, offsets);
+      const rMain = bigNode[gx][gy] ? r.mainBig : r.main;
+      
+      p.ellipse(x1, y1, rMain * 2, rMain * 2);
+      
+      // Horizontal bridge
+      if (gx < cols - 1 && grid[gx + 1][gy]) {
+        const { x: x2, y: y2 } = gridToCanvas(gx + 1, gy, offsets);
+        drawCapsule(p, x1, y1, x2, y2, r.connect);
+      }
+      
+      // Vertical bridge
+      if (gy < rows - 1 && grid[gx][gy + 1]) {
+        const { x: x2, y: y2 } = gridToCanvas(gx, gy + 1, offsets);
+        drawCapsule(p, x1, y1, x2, y2, r.connect);
+      }
+      
+      // Diagonal bridges
+      if (gx < cols - 1 && gy < rows - 1 && grid[gx + 1][gy + 1]) {
+        const { x: x2, y: y2 } = gridToCanvas(gx + 1, gy + 1, offsets);
+        drawCapsule(p, x1, y1, x2, y2, r.connect);
+      }
+      
+      if (gx < cols - 1 && gy > 0 && grid[gx + 1][gy - 1]) {
+        const { x: x2, y: y2 } = gridToCanvas(gx + 1, gy - 1, offsets);
+        drawCapsule(p, x1, y1, x2, y2, r.connect);
+      }
+    }
+  }
+  
+  // 2. White holes
+  p.fill(255);
+  
+  // Node holes
+  if (r.holeNode > 0.1) {
+    for (let gx = 0; gx < cols; gx++) {
+      for (let gy = 0; gy < rows; gy++) {
+        const { x, y } = gridToCanvas(gx, gy, offsets);
+        p.ellipse(x, y, r.holeNode * 2, r.holeNode * 2);
+      }
+    }
+  }
+  
+  // Pair holes
+  if (r.holePair > 0.1) {
+    for (let gx = 0; gx < cols; gx++) {
+      for (let gy = 0; gy < rows; gy++) {
+        if (!grid[gx][gy]) continue;
+        
+        const { x: x1, y: y1 } = gridToCanvas(gx, gy, offsets);
+        
+        if (gx < cols - 1 && grid[gx + 1][gy]) {
+          const { x: x2, y: y2 } = gridToCanvas(gx + 1, gy, offsets);
+          p.ellipse((x1 + x2) / 2, (y1 + y2) / 2, r.holePair * 2, r.holePair * 2);
+        }
+        
+        if (gy < rows - 1 && grid[gx][gy + 1]) {
+          const { x: x2, y: y2 } = gridToCanvas(gx, gy + 1, offsets);
+          p.ellipse((x1 + x2) / 2, (y1 + y2) / 2, r.holePair * 2, r.holePair * 2);
+        }
+      }
+    }
+  }
+  
+  // Big 2x2 holes
+  if (r.holeBig > 0.1) {
+    for (let gx = 0; gx < cols - 1; gx++) {
+      for (let gy = 0; gy < rows - 1; gy++) {
+        if (grid[gx][gy] && grid[gx + 1][gy] && grid[gx][gy + 1] && grid[gx + 1][gy + 1]) {
+          const { x: xTL, y: yTL } = gridToCanvas(gx, gy, offsets);
+          const { x: xBR, y: yBR } = gridToCanvas(gx + 1, gy + 1, offsets);
+          p.ellipse((xTL + xBR) / 2, (yTL + yBR) / 2, r.holeBig * 2, r.holeBig * 2);
+        }
+      }
+    }
+  }
+  
+  // 3. Grid dots
+  if (r.dot > 0.1) {
+    p.fill(0);
+    for (let gx = 0; gx < cols; gx++) {
+      for (let gy = 0; gy < rows; gy++) {
+        const { x, y } = gridToCanvas(gx, gy, offsets);
+        p.ellipse(x, y, r.dot * 2, r.dot * 2);
+      }
+    }
+  }
+}
+
+// ============================================================
+// ACTIONS
+// ============================================================
+
+function generateRandomComposition() {
+  const density = 0.3 + Math.random() * 0.4;
+  
+  for (let x = 0; x < compCols; x++) {
+    for (let y = 0; y < compRows; y++) {
+      compGrid[x][y] = Math.random() < density;
+      compBigNode[x][y] = compGrid[x][y] && Math.random() < 0.15;
+    }
+  }
+  
+  // Create some connected regions
+  for (let i = 0; i < 5; i++) {
+    const startX = Math.floor(Math.random() * (compCols - 3));
+    const startY = Math.floor(Math.random() * (compRows - 3));
+    
+    for (let dx = 0; dx < 3; dx++) {
+      for (let dy = 0; dy < 3; dy++) {
+        if (Math.random() < 0.7) {
+          compGrid[startX + dx][startY + dy] = true;
+        }
+      }
+    }
+  }
+}
+
+function clearComposition() {
+  for (let x = 0; x < compCols; x++) {
+    for (let y = 0; y < compRows; y++) {
+      compGrid[x][y] = false;
+      compBigNode[x][y] = false;
+    }
+  }
+}
+
+function clearCurrentLetter() {
+  const grid = letterGrids[currentLetter];
+  const bigNode = letterBigNodes[currentLetter];
+  
+  for (let x = 0; x < letterCols; x++) {
+    for (let y = 0; y < letterRows; y++) {
+      grid[x][y] = false;
+      bigNode[x][y] = false;
+    }
+  }
+  
+  updateLettersDone();
+  updateTextPreview();
+}
+
+function copyFromComposition() {
+  const grid = letterGrids[currentLetter];
+  const bigNode = letterBigNodes[currentLetter];
+  
+  // Copy from center of composition
+  const offsetX = Math.floor((compCols - letterCols) / 2);
+  const offsetY = Math.floor((compRows - letterRows) / 2);
+  
+  for (let x = 0; x < letterCols; x++) {
+    for (let y = 0; y < letterRows; y++) {
+      const cx = x + offsetX;
+      const cy = y + offsetY;
+      
+      if (cx >= 0 && cx < compCols && cy >= 0 && cy < compRows) {
+        grid[x][y] = compGrid[cx][cy];
+        bigNode[x][y] = compBigNode[cx][cy];
+      }
+    }
+  }
+  
+  updateLettersDone();
+  updateTextPreview();
+}
+
+function updateLettersDone() {
+  let done = 0;
+  CHARS.forEach(char => {
+    const dims = getLetterDims(char);
+    let hasContent = false;
+    for (let x = 0; x < dims.cols && !hasContent; x++) {
+      for (let y = 0; y < dims.rows && !hasContent; y++) {
+        if (letterGrids[char][x] && letterGrids[char][x][y]) hasContent = true;
+      }
+    }
+    if (hasContent) done++;
+  });
+  
+  document.getElementById('letters-done').textContent = `Ukończone: ${done}/${CHARS.length}`;
+}
+
+// ============================================================
+// TEXT PREVIEW
+// ============================================================
+
+function updateTextPreview() {
+  const text = document.getElementById('preview-text').value.toUpperCase();
+  const container = document.getElementById('text-preview-area');
+  container.innerHTML = '';
+  
+  const scale = 0.12;
+  
+  // Find max height for alignment
+  let maxH = 0;
+  for (let char of text) {
+    if (CHARS.includes(char)) {
+      const dims = getLetterDims(char);
+      const h = (MARGIN * 2 + SPACING * (dims.rows - 1)) * scale;
+      if (h > maxH) maxH = h;
+    }
+  }
+  
+  for (let char of text) {
+    if (char === ' ') {
+      const spacer = document.createElement('div');
+      spacer.style.display = 'inline-block';
+      spacer.style.width = '20px';
+      container.appendChild(spacer);
+      continue;
+    }
+    
+    if (!CHARS.includes(char)) continue;
+    
+    const dims = getLetterDims(char);
+    const letterW = (MARGIN * 2 + SPACING * (dims.cols - 1)) * scale;
+    const letterH = (MARGIN * 2 + SPACING * (dims.rows - 1)) * scale;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = letterW;
+    canvas.height = letterH;
+    canvas.style.display = 'inline-block';
+    canvas.style.verticalAlign = 'bottom';
+    canvas.style.marginRight = '2px';
+    
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    
+    drawLetterToContext(ctx, char);
+    
+    container.appendChild(canvas);
+  }
+}
+
+function drawLetterToContext(ctx, char) {
+  const dims = getLetterDims(char);
+  const grid = letterGrids[char];
+  const bigNode = letterBigNodes[char];
+  
+  const r = {
+    main: params.R_MAIN,
+    mainBig: params.R_MAIN * (params.R_OVER / 100),
+    connect: params.R_CONNECT,
+    holeNode: params.R_HOLE_NODE,
+    holePair: params.R_HOLE_PAIR,
+    holeBig: params.R_HOLE_BIG,
+    dot: params.R_DOT
+  };
+  
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, MARGIN * 2 + SPACING * (dims.cols - 1), MARGIN * 2 + SPACING * (dims.rows - 1));
+  
+  // Draw black shapes
+  ctx.fillStyle = '#000';
+  
+  for (let gx = 0; gx < dims.cols; gx++) {
+    for (let gy = 0; gy < dims.rows; gy++) {
+      if (!grid[gx] || !grid[gx][gy]) continue;
+      
+      const { x: x1, y: y1 } = gridToCanvas(gx, gy);
+      const rMain = bigNode[gx][gy] ? r.mainBig : r.main;
+      
+      ctx.beginPath();
+      ctx.arc(x1, y1, rMain, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Bridges
+      const drawBridge = (x2, y2) => {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
+        
+        ctx.save();
+        ctx.translate((x1 + x2) / 2, (y1 + y2) / 2);
+        ctx.rotate(angle);
+        
+        ctx.beginPath();
+        ctx.roundRect(-(len / 2 + r.connect), -r.connect, len + 2 * r.connect, 2 * r.connect, r.connect);
+        ctx.fill();
+        
+        ctx.restore();
+      };
+      
+      if (gx < dims.cols - 1 && grid[gx + 1] && grid[gx + 1][gy]) {
+        drawBridge(gridToCanvas(gx + 1, gy).x, gridToCanvas(gx + 1, gy).y);
+      }
+      if (gy < dims.rows - 1 && grid[gx][gy + 1]) {
+        drawBridge(gridToCanvas(gx, gy + 1).x, gridToCanvas(gx, gy + 1).y);
+      }
+    }
+  }
+  
+  // Draw white holes
+  ctx.fillStyle = '#fff';
+  
+  if (r.holeNode > 0.1) {
+    for (let gx = 0; gx < dims.cols; gx++) {
+      for (let gy = 0; gy < dims.rows; gy++) {
+        const { x, y } = gridToCanvas(gx, gy);
+        ctx.beginPath();
+        ctx.arc(x, y, r.holeNode, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+  
+  // Dots
+  if (r.dot > 0.1) {
+    ctx.fillStyle = '#000';
+    for (let gx = 0; gx < dims.cols; gx++) {
+      for (let gy = 0; gy < dims.rows; gy++) {
+        const { x, y } = gridToCanvas(gx, gy);
+        ctx.beginPath();
+        ctx.arc(x, y, r.dot, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// ============================================================
+// SVG EXPORT
+// ============================================================
+
+function exportSVG(mode) {
+  let grid, bigNode, cols, rows;
+  
+  if (mode === 'composition') {
+    grid = compGrid;
+    bigNode = compBigNode;
+    cols = compCols;
+    rows = compRows;
+  } else {
+    grid = letterGrids[currentLetter];
+    bigNode = letterBigNodes[currentLetter];
+    cols = letterCols;
+    rows = letterRows;
+  }
+  
+  const w = MARGIN * 2 + SPACING * (cols - 1);
+  const h = MARGIN * 2 + SPACING * (rows - 1);
+  
+  const r = {
+    main: params.R_MAIN,
+    mainBig: params.R_MAIN * (params.R_OVER / 100),
+    connect: params.R_CONNECT,
+    holeNode: params.R_HOLE_NODE,
+    holePair: params.R_HOLE_PAIR,
+    holeBig: params.R_HOLE_BIG,
+    dot: params.R_DOT
+  };
+  
+  let blackShapes = [];
+  let holesBlack = [];
+  let dotsBlack = [];
+  
+  // Black shapes
+  for (let gx = 0; gx < cols; gx++) {
+    for (let gy = 0; gy < rows; gy++) {
+      if (!grid[gx][gy]) continue;
+      
+      const { x: x1, y: y1 } = gridToCanvas(gx, gy);
+      const rMain = bigNode[gx][gy] ? r.mainBig : r.main;
+      
+      blackShapes.push(`<circle cx="${x1}" cy="${y1}" r="${rMain}" fill="black" />`);
+      
+      const capsuleTo = (gx2, gy2) => {
+        const { x: x2, y: y2 } = gridToCanvas(gx2, gy2);
+        const cx = (x1 + x2) / 2;
+        const cy = (y1 + y2) / 2;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        
+        blackShapes.push(
+          `<g transform="translate(${cx} ${cy}) rotate(${angle})">` +
+          `<rect x="${-(len/2 + r.connect)}" y="${-r.connect}" width="${len + 2*r.connect}" height="${2*r.connect}" rx="${r.connect}" ry="${r.connect}" fill="black" />` +
+          `</g>`
+        );
+      };
+      
+      if (gx < cols - 1 && grid[gx + 1][gy]) capsuleTo(gx + 1, gy);
+      if (gy < rows - 1 && grid[gx][gy + 1]) capsuleTo(gx, gy + 1);
+      if (gx < cols - 1 && gy < rows - 1 && grid[gx + 1][gy + 1]) capsuleTo(gx + 1, gy + 1);
+      if (gx < cols - 1 && gy > 0 && grid[gx + 1][gy - 1]) capsuleTo(gx + 1, gy - 1);
+    }
+  }
+  
+  // Holes
+  if (r.holeNode > 0.1) {
+    for (let gx = 0; gx < cols; gx++) {
+      for (let gy = 0; gy < rows; gy++) {
+        const { x, y } = gridToCanvas(gx, gy);
+        holesBlack.push(`<circle cx="${x}" cy="${y}" r="${r.holeNode}" fill="black" />`);
+      }
+    }
+  }
+  
+  if (r.holePair > 0.1) {
+    for (let gx = 0; gx < cols; gx++) {
+      for (let gy = 0; gy < rows; gy++) {
+        if (!grid[gx][gy]) continue;
+        const { x: x1, y: y1 } = gridToCanvas(gx, gy);
+        
+        if (gx < cols - 1 && grid[gx + 1][gy]) {
+          const { x: x2, y: y2 } = gridToCanvas(gx + 1, gy);
+          holesBlack.push(`<circle cx="${(x1+x2)/2}" cy="${(y1+y2)/2}" r="${r.holePair}" fill="black" />`);
+        }
+        if (gy < rows - 1 && grid[gx][gy + 1]) {
+          const { x: x2, y: y2 } = gridToCanvas(gx, gy + 1);
+          holesBlack.push(`<circle cx="${(x1+x2)/2}" cy="${(y1+y2)/2}" r="${r.holePair}" fill="black" />`);
+        }
+      }
+    }
+  }
+  
+  if (r.holeBig > 0.1) {
+    for (let gx = 0; gx < cols - 1; gx++) {
+      for (let gy = 0; gy < rows - 1; gy++) {
+        if (grid[gx][gy] && grid[gx + 1][gy] && grid[gx][gy + 1] && grid[gx + 1][gy + 1]) {
+          const { x: xTL, y: yTL } = gridToCanvas(gx, gy);
+          const { x: xBR, y: yBR } = gridToCanvas(gx + 1, gy + 1);
+          holesBlack.push(`<circle cx="${(xTL+xBR)/2}" cy="${(yTL+yBR)/2}" r="${r.holeBig}" fill="black" />`);
+        }
+      }
+    }
+  }
+  
+  // Dots
+  if (r.dot > 0.1) {
+    for (let gx = 0; gx < cols; gx++) {
+      for (let gy = 0; gy < rows; gy++) {
+        const { x, y } = gridToCanvas(gx, gy);
+        dotsBlack.push(`<circle cx="${x}" cy="${y}" r="${r.dot}" fill="black" />`);
+      }
+    }
+  }
+  
+  // Build SVG
+  let svg = [];
+  svg.push('<?xml version="1.0" encoding="UTF-8"?>');
+  svg.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`);
+  svg.push(`<defs>`);
+  svg.push(`<mask id="holesMask" maskUnits="userSpaceOnUse" x="0" y="0" width="${w}" height="${h}">`);
+  svg.push(`<rect width="${w}" height="${h}" fill="white" />`);
+  svg.push(...holesBlack);
+  svg.push(`</mask>`);
+  svg.push(`</defs>`);
+  svg.push(`<g id="letter" mask="url(#holesMask)">`);
+  svg.push(...blackShapes);
+  svg.push(`</g>`);
+  svg.push(`<g id="dots">`);
+  svg.push(...dotsBlack);
+  svg.push(`</g>`);
+  svg.push(`</svg>`);
+  
+  downloadFile(svg.join('\n'), mode === 'composition' ? 'test-composition.svg' : `test-letter-${currentLetter}.svg`, 'image/svg+xml');
+}
+
+// ============================================================
+// TTF EXPORT - OPTIMIZED VERSION
+// ============================================================
+
+let isExporting = false;
+
+async function exportTTF() {
+  if (isExporting) {
+    alert('Export already in progress...');
+    return;
+  }
+  
+  isExporting = true;
+  const btn = document.getElementById('btn-export-ttf');
+  const originalText = btn.textContent;
+  btn.textContent = 'Exporting...';
+  btn.disabled = true;
+  
+  // Allow UI to update
+  await new Promise(r => setTimeout(r, 50));
+  
+  try {
+    const unitsPerEm = 1000;
+    const ascender = 800;
+    const descender = -200;
+    
+    const notdefGlyph = new opentype.Glyph({
+      name: '.notdef',
+      unicode: 0,
+      advanceWidth: 650,
+      path: new opentype.Path()
+    });
+    
+    const glyphs = [notdefGlyph];
+    
+    const spaceGlyph = new opentype.Glyph({
+      name: 'space',
+      unicode: 32,
+      advanceWidth: 400,
+      path: new opentype.Path()
+    });
+    glyphs.push(spaceGlyph);
+    
+    // Process letters in batches to prevent UI freeze
+    for (let i = 0; i < CHARS.length; i++) {
+      const char = CHARS[i];
+      btn.textContent = `Exporting ${char}... (${i+1}/${CHARS.length})`;
+      
+      // Let UI breathe every few letters
+      if (i % 3 === 0) {
+        await new Promise(r => setTimeout(r, 10));
+      }
+      
+      const unicode = char.charCodeAt(0);
+      const opentypePath = buildGlyphOptimized(char, ascender);
+      
+      const glyph = new opentype.Glyph({
+        name: char,
+        unicode: unicode,
+        advanceWidth: 650,
+        path: opentypePath
+      });
+      glyphs.push(glyph);
+      
+      if (char >= 'A' && char <= 'Z') {
+        const lowerUnicode = char.toLowerCase().charCodeAt(0);
+        const lowerGlyph = new opentype.Glyph({
+          name: char.toLowerCase(),
+          unicode: lowerUnicode,
+          advanceWidth: 650,
+          path: opentypePath
+        });
+        glyphs.push(lowerGlyph);
+      }
+    }
+    
+    btn.textContent = 'Building font...';
+    await new Promise(r => setTimeout(r, 10));
+    
+    const fontName = document.getElementById('font-name').value.trim() || 'MojFont';
+    const fontId = Date.now().toString(36).toUpperCase();
+    const fullName = fontName + '-' + fontId;
+    
+    const font = new opentype.Font({
+      familyName: fullName,
+      styleName: 'Regular',
+      unitsPerEm: unitsPerEm,
+      ascender: ascender,
+      descender: descender,
+      glyphs: glyphs
+    });
+    
+    const arrayBuffer = font.toArrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: 'font/ttf' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fullName}.ttf`;
+    a.click();
+    
+    URL.revokeObjectURL(url);
+    
+  } catch (err) {
+    alert('Export error: ' + err.message);
+    console.error(err);
+  } finally {
+    isExporting = false;
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+function buildGlyphOptimized(char, ascender) {
+  const opentypePath = new opentype.Path();
+  const dims = getLetterDims(char);
+  const grid = letterGrids[char];
+  const bigNode = letterBigNodes[char];
+  const offsets = letterGridOffsets[char];
+  
+  if (!grid) return opentypePath;
+  
+  let hasContent = false;
+  for (let x = 0; x < dims.cols && !hasContent; x++) {
+    for (let y = 0; y < dims.rows && !hasContent; y++) {
+      if (grid[x] && grid[x][y]) hasContent = true;
+    }
+  }
+  if (!hasContent) return opentypePath;
+  
+  const canvasH = MARGIN * 2 + SPACING * (dims.rows - 1);
+  const scale = 600 / canvasH;
+  const offsetX = 25;
+  const offsetY = ascender - 80;
+  
+  const r = {
+    main: params.R_MAIN,
+    mainBig: params.R_MAIN * (params.R_OVER / 100),
+    connect: params.R_CONNECT,
+    holeNode: params.R_HOLE_NODE,
+    holePair: params.R_HOLE_PAIR,
+    holeBig: params.R_HOLE_BIG,
+    dot: params.R_DOT
+  };
+  
+  const toFontCoord = (gx, gy) => {
+    let cx = MARGIN + gx * SPACING;
+    let cy = MARGIN + gy * SPACING;
+    
+    if (offsets && offsets[gx] && offsets[gx][gy] && params.CHAOS > 0) {
+      const chaosAmount = params.CHAOS / 100 * SPACING * 0.8;
+      cx += offsets[gx][gy].dx * chaosAmount;
+      cy += offsets[gx][gy].dy * chaosAmount;
+    }
+    
+    return {
+      x: offsetX + cx * scale,
+      y: offsetY - cy * scale
+    };
+  };
+  
+  // Collect all shapes first
+  const circles = [];
+  const capsules = [];
+  const holes = [];
+  const dots = [];
+  
+  // Collect main circles
+  for (let gx = 0; gx < dims.cols; gx++) {
+    for (let gy = 0; gy < dims.rows; gy++) {
+      if (!grid[gx] || !grid[gx][gy]) continue;
+      const pos = toFontCoord(gx, gy);
+      const radius = (bigNode[gx] && bigNode[gx][gy] ? r.mainBig : r.main) * scale;
+      circles.push({ x: pos.x, y: pos.y, r: radius });
+    }
+  }
+  
+  // Collect bridges
+  for (let gx = 0; gx < dims.cols; gx++) {
+    for (let gy = 0; gy < dims.rows; gy++) {
+      if (!grid[gx] || !grid[gx][gy]) continue;
+      const p1 = toFontCoord(gx, gy);
+      
+      const addCapsule = (gx2, gy2) => {
+        if (!grid[gx2] || !grid[gx2][gy2]) return;
+        const p2 = toFontCoord(gx2, gy2);
+        capsules.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, r: r.connect * scale });
+      };
+      
+      if (gx < dims.cols - 1 && grid[gx + 1] && grid[gx + 1][gy]) addCapsule(gx + 1, gy);
+      if (gy < dims.rows - 1 && grid[gx][gy + 1]) addCapsule(gx, gy + 1);
+      if (gx < dims.cols - 1 && gy < dims.rows - 1 && grid[gx + 1] && grid[gx + 1][gy + 1]) addCapsule(gx + 1, gy + 1);
+      if (gx < dims.cols - 1 && gy > 0 && grid[gx + 1] && grid[gx + 1][gy - 1]) addCapsule(gx + 1, gy - 1);
+    }
+  }
+  
+  // Collect holes
+  if (r.holeNode > 1) {
+    for (let gx = 0; gx < dims.cols; gx++) {
+      for (let gy = 0; gy < dims.rows; gy++) {
+        const pos = toFontCoord(gx, gy);
+        holes.push({ x: pos.x, y: pos.y, r: r.holeNode * scale });
+      }
+    }
+  }
+  
+  if (r.holePair > 1) {
+    for (let gx = 0; gx < dims.cols; gx++) {
+      for (let gy = 0; gy < dims.rows; gy++) {
+        if (!grid[gx] || !grid[gx][gy]) continue;
+        const p1 = toFontCoord(gx, gy);
+        
+        if (gx < dims.cols - 1 && grid[gx + 1] && grid[gx + 1][gy]) {
+          const p2 = toFontCoord(gx + 1, gy);
+          holes.push({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, r: r.holePair * scale });
+        }
+        if (gy < dims.rows - 1 && grid[gx][gy + 1]) {
+          const p2 = toFontCoord(gx, gy + 1);
+          holes.push({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, r: r.holePair * scale });
+        }
+      }
+    }
+  }
+  
+  if (r.holeBig > 1) {
+    for (let gx = 0; gx < dims.cols - 1; gx++) {
+      for (let gy = 0; gy < dims.rows - 1; gy++) {
+        if (grid[gx] && grid[gx][gy] && grid[gx + 1] && grid[gx + 1][gy] && grid[gx][gy + 1] && grid[gx + 1][gy + 1]) {
+          const p1 = toFontCoord(gx, gy);
+          const p2 = toFontCoord(gx + 1, gy + 1);
+          holes.push({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, r: r.holeBig * scale });
+        }
+      }
+    }
+  }
+  
+  // Collect dots
+  if (r.dot > 0.5) {
+    for (let gx = 0; gx < dims.cols; gx++) {
+      for (let gy = 0; gy < dims.rows; gy++) {
+        const pos = toFontCoord(gx, gy);
+        dots.push({ x: pos.x, y: pos.y, r: r.dot * scale });
+      }
+    }
+  }
+  
+  // Now use paper.js more efficiently - batch operations
+  paper.project.clear();
+  
+  // Create all black shapes at once
+  const allBlackShapes = [];
+  
+  // Circles as polygons (faster than perfect circles)
+  const circleSegments = 16;
+  circles.forEach(c => {
+    const path = new paper.Path();
+    for (let i = 0; i < circleSegments; i++) {
+      const angle = (i / circleSegments) * Math.PI * 2;
+      path.add(new paper.Point(
+        c.x + Math.cos(angle) * c.r,
+        c.y + Math.sin(angle) * c.r
+      ));
+    }
+    path.closed = true;
+    allBlackShapes.push(path);
+  });
+  
+  // Capsules
+  capsules.forEach(cap => {
+    const dx = cap.x2 - cap.x1;
+    const dy = cap.y2 - cap.y1;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 0.01) return;
+    
+    const px = -dy / len * cap.r;
+    const py = dx / len * cap.r;
+    
+    const path = new paper.Path();
+    // One end semicircle
+    const segments = 8;
+    for (let i = 0; i <= segments; i++) {
+      const angle = Math.atan2(dy, dx) + Math.PI / 2 + (i / segments) * Math.PI;
+      path.add(new paper.Point(
+        cap.x1 + Math.cos(angle) * cap.r,
+        cap.y1 + Math.sin(angle) * cap.r
+      ));
+    }
+    // Other end semicircle
+    for (let i = 0; i <= segments; i++) {
+      const angle = Math.atan2(dy, dx) - Math.PI / 2 + (i / segments) * Math.PI;
+      path.add(new paper.Point(
+        cap.x2 + Math.cos(angle) * cap.r,
+        cap.y2 + Math.sin(angle) * cap.r
+      ));
+    }
+    path.closed = true;
+    allBlackShapes.push(path);
+  });
+  
+  // Unite all black shapes at once
+  let blackShape = allBlackShapes[0];
+  for (let i = 1; i < allBlackShapes.length; i++) {
+    const united = blackShape.unite(allBlackShapes[i]);
+    blackShape.remove();
+    allBlackShapes[i].remove();
+    blackShape = united;
+  }
+  
+  if (!blackShape) return opentypePath;
+  
+  // Subtract all holes at once
+  if (holes.length > 0) {
+    const allHoles = [];
+    holes.forEach(h => {
+      const path = new paper.Path();
+      for (let i = 0; i < circleSegments; i++) {
+        const angle = (i / circleSegments) * Math.PI * 2;
+        path.add(new paper.Point(
+          h.x + Math.cos(angle) * h.r,
+          h.y + Math.sin(angle) * h.r
+        ));
+      }
+      path.closed = true;
+      allHoles.push(path);
+    });
+    
+    // Unite all holes first
+    let holesShape = allHoles[0];
+    for (let i = 1; i < allHoles.length; i++) {
+      const united = holesShape.unite(allHoles[i]);
+      holesShape.remove();
+      allHoles[i].remove();
+      holesShape = united;
+    }
+    
+    // Single subtract operation
+    const subtracted = blackShape.subtract(holesShape);
+    blackShape.remove();
+    holesShape.remove();
+    blackShape = subtracted;
+  }
+  
+  // Add dots
+  if (dots.length > 0) {
+    dots.forEach(d => {
+      const path = new paper.Path();
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        path.add(new paper.Point(
+          d.x + Math.cos(angle) * d.r,
+          d.y + Math.sin(angle) * d.r
+        ));
+      }
+      path.closed = true;
+      
+      const united = blackShape.unite(path);
+      blackShape.remove();
+      path.remove();
+      blackShape = united;
+    });
+  }
+  
+  // Convert to opentype path
+  convertPaperToOpentype(blackShape, opentypePath);
+  blackShape.remove();
+  
+  return opentypePath;
+}
+
+function convertPaperToOpentype(paperPath, opentypePath) {
+  if (!paperPath) return;
+  
+  // Get all paths (handle CompoundPath)
+  const paths = [];
+  if (paperPath.className === 'CompoundPath') {
+    paperPath.children.forEach(child => {
+      if (child.className === 'Path') paths.push(child);
+    });
+  } else if (paperPath.className === 'Path') {
+    paths.push(paperPath);
+  }
+  
+  paths.forEach(path => {
+    const curves = path.curves;
+    if (!curves || curves.length === 0) return;
+    
+    // Move to first point
+    const firstPoint = curves[0].point1;
+    opentypePath.moveTo(firstPoint.x, firstPoint.y);
+    
+    // Draw each curve
+    curves.forEach(curve => {
+      if (curve.isStraight()) {
+        opentypePath.lineTo(curve.point2.x, curve.point2.y);
+      } else {
+        // Cubic bezier
+        opentypePath.curveTo(
+          curve.point1.x + curve.handle1.x,
+          curve.point1.y + curve.handle1.y,
+          curve.point2.x + curve.handle2.x,
+          curve.point2.y + curve.handle2.y,
+          curve.point2.x,
+          curve.point2.y
+        );
+      }
+    });
+    
+    opentypePath.closePath();
+  });
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type: type });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  
+  URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>
